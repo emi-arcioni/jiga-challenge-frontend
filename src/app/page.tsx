@@ -4,13 +4,9 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { GET } from '@/app/api/news';
 
-interface Article {
-  title: string;
-  link: string;
-}
 
 export default function Home() {
-  const [articles, setArticles] = useState<Article[]>([]);
+  const [articles, setArticles] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
