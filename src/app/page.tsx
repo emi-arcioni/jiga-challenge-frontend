@@ -3,24 +3,39 @@
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { GET } from '@/app/api/news';
-
+import { useDebounce, useDebouncedCallback } from 'use-debounce';
 
 export default function Home() {
   const [articles, setArticles] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [value, setValue] = useState('');
+
+  const fetchNews = async (query: string) => {
+    try {
+      const data = await GET(query);
+      setArticles(data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching news:', error);
+    }
+  };
+
+  const debounced = useDebouncedCallback(
+    // function
+    (value) => {
+      setValue(value);
+      fetchNews(value);
+    },
+    // delay in ms
+    300
+  );
+
+  const onSearch = (e: any) => {
+    debounced(e.target.value)
+  };
 
   useEffect(() => {
-    const fetchNews = async () => {
-      try {
-        const data = await GET();
-        setArticles(data);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching news:', error);
-      }
-    };
-
-    fetchNews();
+    fetchNews('');
   }, []);
 
   return (
@@ -30,7 +45,9 @@ export default function Home() {
         <input
           type="text"
           placeholder="Search news..."
-          className="w-1/3 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300"
+          className="w-1/3 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 text-black"
+          onChange={onSearch}
+          defaultValue={value}
         />
         <div className="flex items-center space-x-4">
           <a href="#" className="hover:text-gray-200">
